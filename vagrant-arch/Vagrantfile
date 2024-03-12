@@ -1,0 +1,22 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "archlinux/archlinux"
+  config.vm.network "public_network", bridge: "Realtek 8822CE Wireless LAN 802.11ac PCI-E NIC"
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "4096"
+    vb.cpus = 4
+  end
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo pacman -Sy --noconfirm zsh git wget vim
+    zsh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    sudo chsh -s /usr/bin/zsh vagrant
+    cd ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/
+    git clone https://github.com/zsh-users/zsh-autosuggestions
+    sed -i 's/plugins=(git)/plugins=(zsh-autosuggestions)/' ~/.zshrc
+    mkdir -p "$HOME/.zsh"
+    git clone https://github.com/sindresorhus/pure.git "$HOME/.zsh/pure"
+    echo 'fpath+=($HOME/.zsh/pure)' >> ~/.zshrc
+    echo 'autoload -U promptinit; promptinit' >> ~/.zshrc
+    echo 'prompt pure' >> ~/.zshrc
+    source ~/.zshrc
+  SHELL
+end
