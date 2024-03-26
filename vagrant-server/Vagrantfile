@@ -1,0 +1,28 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "aspyatkin/ubuntu-20.04-server"
+  config.vm.network "public_network", bridge: "Realtek 8822CE Wireless LAN 802.11ac PCI-E NIC"
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "4096"
+    vb.cpus = 4
+  end
+  config.vm.disk :disk, size: "250GB", primary: true
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt update  
+    sudo apt install -y zsh git vim curl wget
+    sudo chsh -s /usr/bin/zsh vagrant
+    touch /home/vagrant/.zshrc
+    source /home/vagrant/.profile
+    echo 'fpath+=(/home/vagrant/.zsh/pure)' >> /home/vagrant/.zshrc
+    echo 'autoload -U promptinit; promptinit' >> /home/vagrant/.zshrc
+    echo 'prompt pure' >> /home/vagrant/.zshrc
+    echo 'export PATH=$PATH:~/.local/bin/' >> /home/vagrant/.zshrc
+    echo 'plugins=(zsh-autosuggestions)' >> /home/vagrant/.zshrc
+    echo 'source /home/vagrant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh' >> /home/vagrant/.zshrc
+    zsh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    mkdir -p /home/vagrant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/
+    git clone https://github.com/zsh-users/zsh-autosuggestions /home/vagrant/.oh-my-zsh/custom/plugins/zsh-autosuggestions/
+    mkdir -p "/home/vagrant/.zsh"
+    git clone https://github.com/sindresorhus/pure.git "/home/vagrant/.zsh/pure"
+    source /home/vagrant/.zshrc
+  SHELL
+end
